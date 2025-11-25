@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sulap Foto Studio AI - Ultimate</title>
+    <meta name="description" content="Aplikasi edit foto AI canggih: Pas Foto, Wedding, Fashion, dan Desain Interior dalam satu klik.">
+    
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { brand: { 900: '#0f172a', 800: '#1e293b', 500: '#6366f1' } }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Core Styles */
+        body { background-color: #020617; color: #f8fafc; overflow: hidden; -webkit-font-smoothing: antialiased; }
+        
+        /* Glassmorphism */
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); }
+        
+        /* Patterns */
+        .checker-bg {
+            background-image: linear-gradient(45deg, #0f172a 25%, transparent 25%), linear-gradient(-45deg, #0f172a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #0f172a 75%), linear-gradient(-45deg, transparent 75%, #0f172a 75%);
+            background-size: 20px 20px;
+        }
+        
+        /* Sidebar Transition */
+        .mobile-sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
+        
+        /* Custom Scrollbar */
+        .custom-scroll { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        /* Navigation Styles */
+        .nav-category { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; font-weight: 700; margin: 1.5rem 0 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .nav-item { display: flex; align-items: center; width: 100%; padding: 0.7rem 1rem; border-radius: 0.75rem; font-size: 0.85rem; font-weight: 500; color: #94a3b8; transition: all 0.2s; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .nav-item.active { background: rgba(99, 102, 241, 0.1); color: #818cf8; border-left-color: #6366f1; }
+
+        /* Interactive Elements */
+        .thumb-btn { transition: all 0.2s; border: 2px solid transparent; opacity: 0.6; cursor: pointer; }
+        .thumb-btn:hover { opacity: 1; }
+        .thumb-btn.selected { border-color: #6366f1; opacity: 1; transform: scale(1.05); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+        .thumb-loader { animation: shimmer 2s infinite linear; background: linear-gradient(to right, #1e293b 4%, #334155 25%, #1e293b 36%); background-size: 1000px 100%; }
+        
+        .ratio-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; border-radius: 0.5rem; padding: 0.5rem; font-size: 0.7rem; font-weight: 600; transition: all 0.2s; cursor: pointer; }
+        .ratio-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+        .ratio-btn.active { background: rgba(99, 102, 241, 0.2); border-color: #6366f1; color: #818cf8; }
+        .ratio-icon { border: 1.5px solid currentColor; margin-bottom: 4px; border-radius: 1px; }
+        
+        .chip-btn { transition: all 0.2s ease; cursor: pointer; }
+        .chip-btn:active { transform: scale(0.95); }
+
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+    </style>
+</head>
+<body class="h-screen w-full flex overflow-hidden bg-[#020617] text-white">
+
+    <!-- MOBILE HEADER -->
+    <header class="md:hidden h-16 w-full bg-[#0b1121]/95 backdrop-blur border-b border-slate-800 flex items-center justify-between px-4 z-50 fixed top-0 left-0">
+        <button onclick="toggleSidebar(true)" class="w-10 h-10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xs shadow-lg">
+                <i class="fas fa-wand-magic-sparkles"></i>
+            </div>
+            <span class="font-bold text-lg tracking-tight">Sulap<span class="text-indigo-400">Foto</span></span>
+        </div>
+        <button onclick="location.reload()" class="w-9 h-9 flex items-center justify-center text-red-400 bg-red-500/10 rounded-lg border border-red-500/20">
+            <i class="fas fa-redo-alt text-xs"></i>
+        </button>
+    </header>
+
+    <!-- BACKDROP OVERLAY -->
+    <div id="mobile-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-[#0b1121] border-r border-slate-800/80 transform -translate-x-full md:translate-x-0 md:static flex flex-col mobile-sidebar shadow-2xl md:shadow-none h-full">
+        <!-- Header Sidebar -->
+        <div class="flex-none h-20 flex items-center px-6 border-b border-slate-800/50 bg-[#0b1121] z-10">
+            <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white mr-3 shadow-lg">
+                <i class="fas fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight text-white">Sulap<span class="text-indigo-400">Foto</span></h1>
+                <p class="text-[10px] text-slate-500 font-medium tracking-wider">AI STUDIO PRO</p>
+            </div>
+            <button onclick="toggleSidebar(false)" class="md:hidden ml-auto text-slate-400 hover:text-white p-2"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Menu List -->
+        <nav class="flex-1 overflow-y-auto custom-scroll p-4 space-y-1 min-h-0 pb-20">
+            <div class="nav-category mt-0">Edit & Restorasi</div>
+            <button onclick="switchMode('repair')" id="nav-repair" class="nav-item"><i class="fas fa-screwdriver-wrench w-5 text-center text-emerald-400"></i> <span>Perbaiki Foto (HD)</span></button>
+            <button onclick="switchMode('pasfoto')" id="nav-pasfoto" class="nav-item"><i class="fas fa-id-card w-5 text-center text-blue-400"></i> <span>Pas Foto (KTP/Nikah)</span></button>
+            <button onclick="switchMode('edit')" id="nav-edit" class="nav-item active"><i class="fas fa-wand-sparkles w-5 text-center text-purple-400"></i> <span>Magic Edit</span></button>
+
+            <div class="nav-category">Fashion & Bisnis</div>
+            <button onclick="switchMode('fashion')" id="nav-fashion" class="nav-item"><i class="fas fa-tshirt w-5 text-center text-fuchsia-400"></i> <span>Foto Fashion</span></button>
+            <button onclick="switchMode('product')" id="nav-product" class="nav-item"><i class="fas fa-box-open w-5 text-center text-orange-400"></i> <span>Foto Produk</span></button>
+            <button onclick="switchMode('carousel')" id="nav-carousel" class="nav-item"><i class="fas fa-images w-5 text-center text-yellow-400"></i> <span>Buat Carousel</span></button>
+            <button onclick="switchMode('banner')" id="nav-banner" class="nav-item"><i class="fas fa-panorama w-5 text-center text-cyan-400"></i> <span>Buat Banner</span></button>
+
+            <div class="nav-category">Wedding & Love</div>
+            <button onclick="switchMode('prewedding')" id="nav-prewedding" class="nav-item"><i class="fas fa-heart w-5 text-center text-pink-500"></i> <span>Prewedding</span></button>
+            <button onclick="switchMode('wedding')" id="nav-wedding" class="nav-item"><i class="fas fa-rings-wedding w-5 text-center text-pink-500"></i> <span>Wedding Day</span></button>
+
+            <div class="nav-category">Seni & Desain</div>
+            <button onclick="switchMode('sketch')" id="nav-sketch" class="nav-item"><i class="fas fa-pencil-alt w-5 text-center text-slate-400"></i> <span>Sketsa Gambar</span></button>
+            <button onclick="switchMode('art')" id="nav-art" class="nav-item"><i class="fas fa-palette w-5 text-center text-rose-400"></i> <span>Art & Karikatur</span></button>
+            <button onclick="switchMode('interior')" id="nav-interior" class="nav-item"><i class="fas fa-couch w-5 text-center text-amber-400"></i> <span>Interior/Eksterior</span></button>
+
+            <div class="nav-category">Keluarga & Momen</div>
+            <button onclick="switchMode('maternity')" id="nav-maternity" class="nav-item"><i class="fas fa-person-pregnant w-5 text-center text-rose-300"></i> <span>Maternity</span></button>
+            <button onclick="switchMode('baby')" id="nav-baby" class="nav-item"><i class="fas fa-baby-carriage w-5 text-center text-sky-400"></i> <span>Baby Born</span></button>
+            <button onclick="switchMode('kids')" id="nav-kids" class="nav-item"><i class="fas fa-shapes w-5 text-center text-yellow-400"></i> <span>Kids & Fun</span></button>
+            <button onclick="switchMode('umroh')" id="nav-umroh" class="nav-item mb-8"><i class="fas fa-kaaba w-5 text-center text-yellow-500"></i> <span>Umroh & Haji</span></button>
+        </nav>
+        
+        <div class="flex-none p-4 border-t border-slate-800/50 bg-[#0b1121] z-10">
+            <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <div class="flex-1">
+                    <p class="text-[10px] text-slate-400 font-mono font-bold">SYSTEM ONLINE</p>
+                    <p class="text-[9px] text-slate-500">Gemini 2.5 Flash</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col relative overflow-hidden bg-slate-950 pt-16 md:pt-0 h-full w-full">
+        <!-- Header Desktop -->
+        <header class="hidden md:flex flex-none h-16 border-b border-slate-800/60 items-center justify-between px-8 bg-[#0b1121]/80 backdrop-blur z-20">
+            <h2 id="current-mode-title" class="text-lg font-bold text-white tracking-tight">Magic Edit</h2>
+            <button onclick="location.reload()" class="text-xs font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 px-4 py-2 rounded-full border border-red-500/20 transition-all">
+                <i class="fas fa-trash-alt mr-2"></i>Reset Canvas
+            </button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scroll w-full">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+                
+                <!-- LEFT PANEL (INPUT) -->
+                <div class="lg:col-span-5 space-y-4 md:space-y-6">
+                    <div class="md:hidden flex items-center justify-between">
+                        <h2 id="mobile-mode-title" class="text-lg font-bold text-white">Magic Edit</h2>
+                        <div id="mobile-badges" class="scale-90 origin-right"></div>
+                    </div>
+
+                    <!-- UPLOAD AREA -->
+                    <div class="glass-panel rounded-2xl p-1.5 relative shadow-xl min-h-[250px]">
+                        <!-- Dual Toggle -->
+                        <div id="dual-toggle-container" class="hidden absolute top-3 right-3 z-20">
+                            <label class="bg-black/60 backdrop-blur px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 cursor-pointer shadow-lg hover:bg-black/80 transition-colors">
+                                <span class="text-[10px] font-bold text-slate-300 uppercase">2 Orang</span>
+                                <input type="checkbox" id="dual-mode-toggle" class="sr-only peer" onchange="toggleDualMode(this.checked)">
+                                <div class="w-8 h-4 bg-slate-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:start-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500 relative top-[1px]"></div>
+                            </label>
+                        </div>
+
+                        <!-- Single Upload -->
+                        <div id="single-upload-ui" class="h-[250px] md:h-[280px] relative border-2 border-dashed border-slate-700/60 hover:border-indigo-500/60 rounded-xl bg-slate-900/40 cursor-pointer group flex flex-col items-center justify-center overflow-hidden transition-colors">
+                            <input type="file" id="file-single" class="hidden" accept="image/*" onchange="handleFile(this, 'single')">
+                            <div id="msg-single" class="text-center p-6 transition-transform duration-300 group-hover:-translate-y-2 pointer-events-none">
+                                <div class="w-14 h-14 bg-slate-800/80 rounded-2xl flex items-center justify-center mx-auto text-slate-500 group-hover:text-indigo-400 ring-1 ring-white/5 mb-3">
+                                    <i id="single-icon" class="fas fa-cloud-upload-alt text-2xl"></i>
+                                </div>
+                                <p class="text-sm font-bold text-slate-200">Upload Foto</p>
+                                <p class="text-[10px] text-slate-500 mt-1">Tap disini untuk pilih foto</p>
+                            </div>
+                            <img id="preview-single" class="absolute inset-0 w-full h-full object-contain hidden bg-[#0b1121]" />
+                            <button onclick="removeImage('single')" id="rm-single" class="hidden absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full z-10 shadow-lg hover:scale-110 transition-transform"><i class="fas fa-times"></i></button>
+                        </div>
+
+                        <!-- Dual Upload -->
+                        <div id="dual-upload-ui" class="hidden h-[250px] md:h-[280px] flex gap-1.5">
+                            <div onclick="document.getElementById('file-dual-1').click()" class="flex-1 relative border-2 border-dashed border-slate-700/60 rounded-l-xl bg-slate-900/40 cursor-pointer flex flex-col items-center justify-center overflow-hidden group hover:border-blue-500/40 transition-colors">
+                                <input type="file" id="file-dual-1" class="hidden" accept="image/*" onchange="handleFile(this, 'dual1')">
+                                <div id="msg-dual-1" class="text-center pointer-events-none">
+                                    <i class="fas fa-male text-2xl text-slate-500 mb-2 group-hover:text-blue-400"></i>
+                                    <p class="text-[10px] font-bold text-slate-300">Pria/Kiri</p>
+                                </div>
+                                <img id="preview-dual-1" class="absolute inset-0 w-full h-full object-cover hidden" />
+                            </div>
+                            <div onclick="document.getElementById('file-dual-2').click()" class="flex-1 relative border-2 border-dashed border-slate-700/60 rounded-r-xl bg-slate-900/40 cursor-pointer flex flex-col items-center justify-center overflow-hidden group hover:border-pink-500/40 transition-colors">
+                                <input type="file" id="file-dual-2" class="hidden" accept="image/*" onchange="handleFile(this, 'dual2')">
+                                <div id="msg-dual-2" class="text-center pointer-events-none">
+                                    <i class="fas fa-female text-2xl text-slate-500 mb-2 group-hover:text-pink-400"></i>
+                                    <p class="text-[10px] font-bold text-slate-300">Wanita/Kanan</p>
+                                </div>
+                                <img id="preview-dual-2" class="absolute inset-0 w-full h-full object-cover hidden" />
+                            </div>
+                        </div>
+
+                        <div id="banner-guides" class="absolute inset-0 pointer-events-none hidden z-10 flex items-center justify-center">
+                            <div class="w-full h-full border-x-[30px] border-black/60 flex items-center justify-center"><span class="text-[9px] text-white/50 bg-black/50 px-2 py-1 rounded">Area Edit AI</span></div>
+                        </div>
+                    </div>
+
+                    <!-- CONTROLS -->
+                    <div class="space-y-3">
+                        <div class="glass-panel p-4 rounded-xl border-t-2 border-t-indigo-500/50">
+                            
+                            <!-- Repair Options -->
+                            <div id="repair-options" class="hidden mb-4">
+                                <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Metode Perbaikan</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button onclick="setRepairType('unblur', this)" class="ratio-btn active"><i class="fas fa-eye w-4 h-4 mb-1"></i><span>Pertajam</span></button>
+                                    <button onclick="setRepairType('colorize', this)" class="ratio-btn"><i class="fas fa-palette w-4 h-4 mb-1"></i><span>Warnai</span></button>
+                                    <button onclick="setRepairType('denoise', this)" class="ratio-btn"><i class="fas fa-wand-magic w-4 h-4 mb-1"></i><span>Hapus Noise</span></button>
+                                    <button onclick="setRepairType('upscale', this)" class="ratio-btn"><i class="fas fa-expand w-4 h-4 mb-1"></i><span>HD Upscale</span></button>
+                                </div>
+                            </div>
+
+                            <!-- Carousel Options -->
+                            <div id="carousel-options" class="hidden mb-4">
+                                <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Jumlah Slide</label>
+                                <div class="flex gap-2">
+                                    <button onclick="setCarouselSlides(3, this)" class="ratio-btn active flex-1">3 Slide</button>
+                                    <button onclick="setCarouselSlides(4, this)" class="ratio-btn flex-1">4 Slide</button>
+                                </div>
+                            </div>
+
+                            <!-- Ratio Selector -->
+                            <div id="ratio-selector" class="mb-4">
+                                <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Ukuran Foto</label>
+                                <div class="grid grid-cols-5 gap-2">
+                                    <button onclick="setRatio('1:1', this)" class="ratio-btn active" data-ratio="1:1"><div class="ratio-icon w-4 h-4"></div><span>1:1</span></button>
+                                    <button onclick="setRatio('9:16', this)" class="ratio-btn" data-ratio="9:16"><div class="ratio-icon w-3 h-5"></div><span>Story</span></button>
+                                    <button onclick="setRatio('16:9', this)" class="ratio-btn" data-ratio="16:9"><div class="ratio-icon w-5 h-3"></div><span>Land</span></button>
+                                    <button onclick="setRatio('4:5', this)" class="ratio-btn" data-ratio="4:5"><div class="ratio-icon w-3 h-4"></div><span>4:5</span></button>
+                                    <button onclick="setRatio('3:4', this)" class="ratio-btn" data-ratio="3:4"><div class="ratio-icon w-3.5 h-4.5"></div><span>3:4</span></button>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-bold text-slate-400 uppercase">Prompt (Pilih / Tulis)</label>
+                                <button onclick="suggestPrompt()" class="text-[10px] text-indigo-300 flex items-center gap-1 bg-indigo-500/10 px-2 py-1 rounded-full border border-indigo-500/20 hover:bg-indigo-500/20"><i class="fas fa-magic"></i> Acak</button>
+                            </div>
+                            
+                            <textarea id="prompt-box" rows="2" class="w-full bg-[#0b1121] border border-slate-700/50 rounded-lg p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-200 placeholder-slate-600 resize-none shadow-inner transition-all" placeholder="Deskripsikan hasil yang diinginkan..."></textarea>
+                            
+                            <div id="preset-chips" class="flex flex-wrap gap-2 mt-3 max-h-32 overflow-y-auto custom-scroll pr-1"></div>
+                        </div>
+
+                        <button id="generate-btn" onclick="processImage()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 disabled:opacity-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group relative overflow-hidden border border-indigo-400/20">
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                            <i class="fas fa-wand-magic-sparkles"></i> <span>Wujudkan (4 Variasi)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL: RESULTS -->
+                <div class="lg:col-span-7 h-full min-h-[500px] mb-8 lg:mb-0 flex flex-col gap-4">
+                    <!-- Main Preview -->
+                    <div class="glass-panel rounded-xl border-slate-700/50 flex flex-col relative overflow-hidden shadow-2xl bg-[#0b1121]/50 h-[450px] md:h-[500px]">
+                        <div class="h-12 border-b border-slate-700/50 bg-[#0f172a]/40 flex items-center justify-between px-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Preview</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="downloadCarousel()" id="btn-dl-carousel" class="hidden text-[10px] font-bold bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-1.5 rounded flex items-center gap-1 shadow-lg"><i class="fas fa-images"></i> Save Slides</button>
+                                <button onclick="downloadImage()" id="btn-download" disabled class="text-[10px] font-bold bg-white text-slate-900 px-3 py-1.5 rounded disabled:opacity-30 flex items-center gap-1 hover:bg-slate-200 transition-colors"><i class="fas fa-download"></i> Simpan HD</button>
+                            </div>
+                        </div>
+                        <div class="flex-1 relative checker-bg flex items-center justify-center p-4 overflow-auto">
+                            <div id="output-placeholder" class="text-center opacity-50">
+                                <i class="fas fa-images text-5xl text-slate-600 mb-3"></i>
+                                <p class="text-xs text-slate-400">Pilih variasi untuk melihat detail</p>
+                            </div>
+                            <img id="output-image" class="max-w-full max-h-full shadow-2xl rounded hidden object-contain z-10 transition-opacity duration-300" />
+                            <div id="loader" class="absolute inset-0 bg-[#020617]/90 z-20 hidden flex flex-col items-center justify-center backdrop-blur-sm">
+                                <div class="w-12 h-12 border-4 border-slate-800 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+                                <p class="text-indigo-400 text-xs font-bold animate-pulse tracking-widest uppercase">Memproses...</p>
+                                <p id="loader-step" class="text-slate-500 text-[10px] mt-1 font-mono">AI sedang bekerja...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thumbnails -->
+                    <div class="glass-panel rounded-xl p-3">
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">Variasi Hasil</p>
+                            <span class="text-[9px] text-slate-600 bg-slate-800 px-2 py-0.5 rounded">Pilih salah satu</span>
+                        </div>
+                        <div id="thumbnails-container" class="grid grid-cols-4 gap-3 h-20 md:h-24">
+                            <div id="slot-0" class="thumb-btn relative rounded-lg bg-slate-800 overflow-hidden cursor-pointer flex items-center justify-center group" onclick="selectResult(0)"><span class="text-[9px] text-slate-600 font-bold group-hover:text-slate-400">1</span><img id="thumb-0" class="absolute inset-0 w-full h-full object-cover hidden"></div>
+                            <div id="slot-1" class="thumb-btn relative rounded-lg bg-slate-800 overflow-hidden cursor-pointer flex items-center justify-center group" onclick="selectResult(1)"><span class="text-[9px] text-slate-600 font-bold group-hover:text-slate-400">2</span><img id="thumb-1" class="absolute inset-0 w-full h-full object-cover hidden"></div>
+                            <div id="slot-2" class="thumb-btn relative rounded-lg bg-slate-800 overflow-hidden cursor-pointer flex items-center justify-center group" onclick="selectResult(2)"><span class="text-[9px] text-slate-600 font-bold group-hover:text-slate-400">3</span><img id="thumb-2" class="absolute inset-0 w-full h-full object-cover hidden"></div>
+                            <div id="slot-3" class="thumb-btn relative rounded-lg bg-slate-800 overflow-hidden cursor-pointer flex items-center justify-center group" onclick="selectResult(3)"><span class="text-[9px] text-slate-600 font-bold group-hover:text-slate-400">4</span><img id="thumb-3" class="absolute inset-0 w-full h-full object-cover hidden"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="h-16 bg-[#0b1121] border border-slate-800/60 rounded-xl p-3 overflow-y-auto font-mono text-[9px] text-slate-400 custom-scroll shadow-inner">
+                        <div id="debug-log" class="space-y-1"><div>> System Ready.</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer with Year & Creator -->
+            <div class="mt-8 pt-6 border-t border-slate-800/50 text-center text-slate-500 text-[10px] pb-4">
+                <p>Dibuat oleh <span class="text-indigo-400 font-bold">Sulap Foto Team</span> &copy; <br> <span id="year"></span>. All Rights Reserved.</p>
+            </div>
+        </div>
+    </main>
+    <canvas id="proc-canvas" class="hidden"></canvas>
+    <canvas id="slice-canvas" class="hidden"></canvas>
+
+    <script>
+        // --- CONFIGURATION AREA ---
+        const apiKey = ""; // << AIzaSyD1GR8KnEM3IRuQhwQStzLoZq1A6JGMOEQ
+        const MODEL = "gemini-2.5-flash-image-preview";
+        
+        // --- SYSTEM LOGIC ---
+        const RATIOS = { "1:1": { w: 1024, h: 1024 }, "9:16": { w: 576, h: 1024 }, "16:9": { w: 1024, h: 576 }, "4:5": { w: 819, h: 1024 }, "3:4": { w: 768, h: 1024 } };
+        let state = { mode: 'edit', imgData: { single: null, dual1: null, dual2: null }, isDual: false, results: [], selectedIndex: 0, ratio: '1:1', repairType: 'unblur', carouselSlides: 3 };
+
+        // EXPANDED PRESETS LIST
+        const presets = {
+            edit: [
+                "Kartun 3D Disney Pixar Style, wajah imut", "Cyberpunk Neon City, futuristik, hujan malam", 
+                "Gaya Lukisan Minyak (Oil Painting) Klasik", "Sketsa Pensil Realistik Hitam Putih", 
+                "Gaya Anime Jepang Studio Ghibli, background hijau", "Retro Vintage 80s Aesthetic, efek film",
+                "Pop Art Warna Warni Andy Warhol", "Cinematic Movie Poster Style, dramatis",
+                "Double Exposure Artistic dengan Alam", "Gaya Pixel Art 8-bit Game Retro",
+                "Watercolor Painting Soft Pastel", "Futuristic Sci-Fi Background Luar Angkasa"
+            ],
+            pasfoto: [
+                "Latar Merah - Kemeja Putih Polos", "Latar Biru - Kemeja Putih Polos",
+                "Latar Merah - Jas Hitam Dasi Merah", "Latar Biru - Jas Hitam Dasi Biru",
+                "Latar Merah - Batik Formal Pria", "Latar Biru - Kebaya Nasional Wanita",
+                "Latar Putih - Professional Headshot Jas", "Latar Abu-abu - Casual Professional",
+                "Ganti Baju Seragam PNS/ASN Rapi", "Ganti Baju Blazer Kantor Wanita Modern"
+            ],
+            fashion: [
+                "Streetwear Urban Style di Tokyo Malam Hari", "High Fashion Editorial Runway Paris",
+                "Casual Summer Outfit di Pantai Bali", "Vintage 90s Grunge Look, Jaket Denim",
+                "Outfit Musim Dingin Mantel Tebal Berbulu", "Gaya Bohemian Chic di Taman Bunga",
+                "Minimalist Korean Fashion Style Pastel", "Business Casual di Coffee Shop Mewah",
+                "Sporty Gym Activewear Look, Energetik", "Glamour Night Gown Red Carpet Event"
+            ],
+            product: [
+                "Podium Kayu Minimalis dengan Tanaman Hias", "Latar Belakang Putih Bersih Studio Lighting",
+                "Kain Sutra Mewah Elegan sebagai Alas", "Batu Alam di Pinggir Sungai Jernih Alami",
+                "Cahaya Matahari Pagi (Golden Hour) Estetik", "Neon Cyberpunk Product Display Glowing",
+                "Dapur Modern Bersih untuk Produk Makanan", "Meja Kerja Kayu Aesthetic dengan Laptop",
+                "Floating Product di Angkasa Futuristik", "Splash Air Segar Dramatis High Speed"
+            ],
+            interior: [
+                "Ruang Tamu Scandinavian Minimalis Putih", "Kamar Tidur Japandi Warm Light Cozy",
+                "Dapur Mewah Marble Island Modern", "Ruang Kerja Industrial Loft Bata Ekspos",
+                "Kafe Cozy dengan Banyak Tanaman Hias", "Kamar Mandi Hotel Bintang 5 Mewah",
+                "Perpustakaan Pribadi Klasik Kayu Jati", "Ruang Keluarga Boho Chic Style Santai"
+            ],
+            exterior: [
+                "Rumah Minimalis Modern Fasad Putih Kotak", "Villa Tropis Bali dengan Kolam Renang Biru",
+                "Rumah Klasik Amerika Halaman Rumput Luas", "Gedung Kantor Kaca Futuristik Tinggi",
+                "Rumah Kayu Kabin di Hutan Pinus Asri", "Taman Belakang Modern dengan Gazebo Kayu",
+                "Ruko Modern Industrial Facade Hitam Kaca"
+            ],
+            sketch: [
+                "Sketsa Pensil Hitam Putih Detail Wajah", "Lukisan Cat Air (Watercolor) Artistik Abstrak",
+                "Karikatur Wajah Lucu Kepala Besar Kartun", "Gambar Teknik Blueprint Arsitek Garis Biru",
+                "Lukisan Impresionis ala Van Gogh Starry Night", "Vector Art Flat Design Illustration Clean",
+                "Stencil Art Graffiti Style Jalanan", "Charcoal Drawing (Arang) Dramatis Gelap"
+            ],
+            maternity: [
+                "Siluet Ibu Hamil di Jendela Sunset Dramatis", "Foto Studio Elegan Background Hitam Low Key",
+                "Tema Peri Hutan Magis (Ethereal) Dreamy", "Casual di Rumah Suasana Nyaman Putih",
+                "Gaun Panjang Terbang di Pantai Berangin", "Milk Bath Photography dengan Bunga Segar",
+                "Close-up Perut dengan Sepatu Bayi Lucu"
+            ],
+            baby: [
+                "Newborn di Keranjang Rotan Rustic Jerami", "Bayi Tidur di Atas Awan Putih Lembut",
+                "Kostum Hewan Lucu (Beruang/Kelinci) Bulu", "Tema Petualang Kecil (Pilot/Pelaut) Peta",
+                "Close-up Wajah Polos Cahaya Lembut Natural", "Bayi di Taman Bunga Matahari Cerah",
+                "Tema Kerajaan (Pangeran/Putri Kecil) Mahkota"
+            ],
+            kids: [
+                "Anak Bermain Lari di Padang Rumput Hijau", "Kostum Superhero Terbang di Kota Metropolis",
+                "Tema Sihir Harry Potter Perpustakaan Tua", "Bermain Gelembung Sabun Ceria Taman",
+                "Piknik di Taman dengan Boneka dan Buah", "Astronot Kecil di Luar Angkasa Planet",
+                "Melukis Berantakan Penuh Warna Ceria"
+            ],
+            wedding: [
+                "Pelaminan Mewah Dekorasi Bunga Segar Penuh", "Akad Nikah di Masjid Putih Megah Islami",
+                "Pemberkatan di Altar Gereja Klasik Lilin", "Garden Party Malam Lampu Gantung Romantis",
+                "Foto Studio Elegan Background Polos Abstrak", "Pernikahan Adat Jawa Dodotan Klasik",
+                "Pernikahan Adat Sunda Siger Modifikasi", "Cinematic Veil Shot (Kerudung Terbang) Dramatis"
+            ],
+            prewedding: [
+                "Casual Santai di Pantai Pasir Putih Sunset", "Street Style di Kota Tua Eropa Klasik",
+                "Romantis di Bawah Hujan Payung Berdua", "Piknik Vintage di Padang Ilalang Sore",
+                "Tema Camping Gunung Api Unggun Malam", "Casual Jeans & Kaos Putih Studio Clean",
+                "Adat Bali Modifikasi Artistik Pura"
+            ],
+            umroh: [
+                "Berdiri Berdoa di Depan Ka'bah Mekkah", "Suasana Masjid Nabawi Payung Terbuka Indah",
+                "Potret di Padang Arafah Saat Wukuf Putih", "Memakai Baju Ihram Background Masjidil Haram",
+                "Berdoa Khusyuk Tangan Menengadah Langit", "Jabal Rahmah Suasana Ramai Bukit Batu",
+                "Malam Hari di Masjidil Haram Lampu Indah"
+            ],
+            repair: [
+                "Perbaiki Kualitas Foto (Enhance Overall)", "Hanya Pertajam Wajah yang Blur (Face Restore)",
+                "Restorasi Foto Lama Rusak & Sobek", "Warnai Foto Hitam Putih (Colorize Natural)",
+                "Hapus Noise/Bintik pada Foto Malam", "Upscale Resolusi Tinggi 4K Tajam"
+            ],
+            carousel: [
+                "Panoramic Seamless Beach Sunset (Sambung)", "Abstract Infographic Background Continuous",
+                "Modern Corporate Office Wide Angle View", "Comic Book Strip Storytelling Panel",
+                "Travel Journey Timeline Horizontal Scroll", "Product Showcase Slider Clean White"
+            ],
+            art: [
+                "Funny Caricature Big Head Cartoon Style", "Oil Painting Van Gogh Starry Night Swirls",
+                "Pop Art Andy Warhol Colorful 4 Panels", "Watercolor Artistic Splash Effect Portrait"
+            ]
+        };
+
+        function init() {
+            document.getElementById('year').textContent = new Date().getFullYear();
+            document.getElementById('single-upload-ui').onclick = (e) => {
+                if(e.target.id !== 'rm-single' && !e.target.closest('#rm-single')) document.getElementById('file-single').click();
+            };
+            switchMode('edit');
+        }
+
+        window.toggleSidebar = (show) => {
+            const sb = document.getElementById('sidebar');
+            const bd = document.getElementById('mobile-backdrop');
+            if(show) { sb.classList.remove('-translate-x-full'); bd.classList.remove('hidden'); setTimeout(()=>bd.classList.remove('opacity-0'),10); }
+            else { sb.classList.add('-translate-x-full'); bd.classList.add('opacity-0'); setTimeout(()=>bd.classList.add('hidden'),300); }
+        };
+
+        window.setRatio = (ratio, btn) => {
+            state.ratio = ratio;
+            document.querySelectorAll('#ratio-selector .ratio-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+
+        window.setRepairType = (type, btn) => {
+            state.repairType = type;
+            document.querySelectorAll('#repair-options .ratio-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+
+        window.setCarouselSlides = (num, btn) => {
+            state.carouselSlides = num;
+            document.querySelectorAll('#carousel-options .ratio-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+
+        window.switchMode = (mode) => {
+            state.mode = mode;
+            if(window.innerWidth < 768) toggleSidebar(false);
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const navBtn = document.getElementById(`nav-${mode}`);
+            if(navBtn) navBtn.classList.add('active');
+
+            const repairUI = document.getElementById('repair-options');
+            const carouselUI = document.getElementById('carousel-options');
+            const ratioUI = document.getElementById('ratio-selector');
+            const bannerGuides = document.getElementById('banner-guides');
+            const dlCarousel = document.getElementById('btn-dl-carousel');
+
+            repairUI.classList.add('hidden'); carouselUI.classList.add('hidden');
+            ratioUI.classList.remove('hidden'); bannerGuides.classList.add('hidden');
+            dlCarousel.classList.add('hidden');
+
+            if (mode === 'repair') { repairUI.classList.remove('hidden'); ratioUI.classList.add('hidden'); }
+            else if (mode === 'carousel') { carouselUI.classList.remove('hidden'); ratioUI.classList.add('hidden'); }
+            else if (mode === 'banner') { bannerGuides.classList.remove('hidden'); }
+
+            const dualDefaults = ['prewedding', 'wedding', 'maternity'];
+            const dualCapable = ['umroh', 'fashion'];
+            
+            if (dualDefaults.includes(mode)) {
+                document.getElementById('dual-toggle-container').classList.remove('hidden');
+                document.getElementById('dual-mode-toggle').checked = true; forceDualMode(true);
+            } else if (dualCapable.includes(mode)) {
+                document.getElementById('dual-toggle-container').classList.remove('hidden');
+                document.getElementById('dual-mode-toggle').checked = false; forceDualMode(false);
+            } else {
+                forceDualMode(false); document.getElementById('dual-toggle-container').classList.add('hidden');
+            }
+
+            const title = mode.replace(/^\w/, c => c.toUpperCase()).replace('born', ' Born').replace('foto', ' Foto');
+            document.getElementById('current-mode-title').innerText = title;
+            document.getElementById('mobile-mode-title').innerText = title;
+            renderChips();
+        };
+
+        function forceDualMode(isDual) {
+            state.isDual = isDual;
+            if (isDual) {
+                document.getElementById('single-upload-ui').classList.add('hidden');
+                document.getElementById('dual-upload-ui').classList.remove('hidden');
+            } else {
+                document.getElementById('single-upload-ui').classList.remove('hidden');
+                document.getElementById('dual-upload-ui').classList.add('hidden');
+            }
+            updateBadges();
+        }
+
+        window.toggleDualMode = (checked) => forceDualMode(checked);
+
+        function updateBadges() {
+            const container = document.getElementById('mobile-badges');
+            container.innerHTML = `<span class="text-[9px] font-bold px-2 py-0.5 rounded border ${state.isDual ? 'bg-pink-900/40 text-pink-300 border-pink-500/30' : 'bg-blue-900/40 text-blue-300 border-blue-500/30'}">${state.isDual ? 'DUAL MODE' : 'SINGLE MODE'}</span>`;
+        }
+
+        function renderChips() {
+            const container = document.getElementById('preset-chips');
+            container.innerHTML = '';
+            (presets[state.mode] || presets['edit']).forEach(text => {
+                const btn = document.createElement('button');
+                btn.className = "chip-btn text-[10px] whitespace-nowrap bg-slate-800 hover:bg-indigo-600 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-full transition-colors shadow-sm";
+                btn.innerText = text;
+                btn.onclick = () => document.getElementById('prompt-box').value = text;
+                container.appendChild(btn);
+            });
+        }
+
+        window.handleFile = (input, type) => {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                state.imgData[type] = e.target.result;
+                if(type==='single') {
+                    const img = document.getElementById('preview-single'); img.src=e.target.result; img.classList.remove('hidden');
+                    document.getElementById('msg-single').classList.add('hidden'); document.getElementById('rm-single').classList.remove('hidden');
+                } else {
+                    const s = type==='dual1'?'-1':'-2';
+                    const img = document.getElementById('preview-dual'+s); img.src=e.target.result; img.classList.remove('hidden');
+                    document.getElementById('msg-dual'+s).classList.add('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.removeImage = (type) => {
+            state.imgData[type] = null;
+            document.getElementById('file-'+type).value='';
+            document.getElementById('preview-'+type).classList.add('hidden');
+            document.getElementById('msg-'+type).classList.remove('hidden');
+            if(type==='single') document.getElementById('rm-single').classList.add('hidden');
+        };
+
+        async function prepareCanvas() {
+            return new Promise((resolve, reject) => {
+                const cvs = document.getElementById('proc-canvas');
+                const ctx = cvs.getContext('2d');
+                let targetW, targetH;
+
+                if (state.mode === 'carousel') {
+                    targetW = 512 * state.carouselSlides; targetH = 512;
+                } else if (state.mode === 'repair') {
+                    targetW = 1024; targetH = 1024; 
+                } else {
+                    const r = RATIOS[state.ratio]; targetW = r.w; targetH = r.h;
+                }
+
+                cvs.width = targetW; cvs.height = targetH;
+                ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0, targetW, targetH);
+
+                const drawImageProp = (ctx, img, x, y, w, h, offsetX, offsetY) => {
+                    if (arguments.length === 2) { x = y = 0; w = ctx.canvas.width; h = ctx.canvas.height; }
+                    offsetX = typeof offsetX === "number" ? offsetX : 0.5; offsetY = typeof offsetY === "number" ? offsetY : 0.5;
+                    var iw = img.width, ih = img.height, r = Math.min(w / iw, h / ih), nw = iw * r, nh = ih * r, cx, cy, cw, ch, ar = 1;
+                    if (nw < w) ar = w / nw; if (Math.abs(ar - 1) < 1e-14 && nh < h) ar = h / nh;
+                    nw *= ar; nh *= ar; cw = iw / (nw / w); ch = ih / (nh / h); cx = (iw - cw) * offsetX; cy = (ih - ch) * offsetY;
+                    if (cx < 0) cx = 0; if (cy < 0) cy = 0; if (cw > iw) cw = iw; if (ch > ih) ch = ih;
+                    ctx.drawImage(img, cx, cy, cw, ch,  x, y, w, h);
+                }
+
+                if(state.isDual) {
+                    if(!state.imgData.dual1 || !state.imgData.dual2) return reject("Upload 2 foto!");
+                    const i1 = new Image(); const i2 = new Image();
+                    let l=0; 
+                    const go = () => {
+                        ctx.save(); ctx.beginPath(); ctx.rect(0, 0, targetW/2, targetH); ctx.clip();
+                        drawImageProp(ctx, i1, 0, 0, targetW/2 + 50, targetH, 0.5, 0.5); ctx.restore();
+                        ctx.save(); ctx.beginPath(); ctx.rect(targetW/2, 0, targetW/2, targetH); ctx.clip();
+                        drawImageProp(ctx, i2, targetW/2 - 50, 0, targetW/2 + 50, targetH, 0.5, 0.5); ctx.restore();
+                        resolve(cvs.toDataURL('image/jpeg', 0.9));
+                    };
+                    i1.onload=()=>{l++;if(l==2)go()}; i2.onload=()=>{l++;if(l==2)go()};
+                    i1.src=state.imgData.dual1; i2.src=state.imgData.dual2;
+                } else {
+                    if(!state.imgData.single) return reject("Upload foto dulu!");
+                    const img=new Image();
+                    img.onload=()=>{
+                        if(state.mode==='banner' || state.mode==='carousel'){
+                            ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0, targetW, targetH);
+                            const scale = Math.min((targetW*0.5)/img.width, (targetH*0.8)/img.height);
+                            const w = img.width*scale, h = img.height*scale;
+                            ctx.drawImage(img, (targetW-w)/2, (targetH-h)/2, w, h);
+                        } else {
+                            drawImageProp(ctx, img, 0, 0, targetW, targetH, 0.5, 0.5);
+                        }
+                        resolve(cvs.toDataURL('image/jpeg', 0.9));
+                    };
+                    img.src=state.imgData.single;
+                }
+            });
+        }
+
+        window.processImage = async () => {
+            if(!apiKey) return alert("PENTING: Anda belum mengisi API KEY di dalam kode!");
+            const prompt = document.getElementById('prompt-box').value;
+            if(!prompt) return alert("Isi perintah teks!");
+            const btn = document.getElementById('generate-btn');
+            const ldr = document.getElementById('loader');
+            
+            btn.disabled=true; ldr.classList.remove('hidden');
+            document.getElementById('output-image').classList.add('hidden');
+            document.getElementById('output-placeholder').classList.add('hidden');
+            document.getElementById('btn-dl-carousel').classList.add('hidden');
+            state.results = [];
+            for(let i=0; i<4; i++) {
+                document.getElementById(`thumb-${i}`).classList.add('hidden');
+                document.getElementById(`slot-${i}`).classList.add('thumb-loader');
+                document.getElementById(`slot-${i}`).classList.remove('selected');
+            }
+
+            try {
+                document.getElementById('loader-step').innerText = "Menyiapkan komposisi...";
+                const b64 = await prepareCanvas();
+                const clean = b64.split(',')[1];
+                document.getElementById('loader-step').innerText = "Mengirim 4 variasi...";
+                
+                let p = prompt;
+                if(state.mode === 'repair') {
+                    if(state.repairType === 'unblur') p = `Fix this image, make it extremely sharp, high definition, remove blur, 8k detail, ${p}`;
+                    else if(state.repairType === 'colorize') p = `Colorize this black and white photo accurately, realistic skin tones, natural lighting, ${p}`;
+                    else if(state.repairType === 'denoise') p = `Remove noise and grain, smooth texture, clean photography, ${p}`;
+                    else if(state.repairType === 'upscale') p = `Upscale to 4k, enhance details, masterpiece quality, ${p}`;
+                } else if (state.mode === 'carousel') {
+                    p = `Create a seamless panoramic continuous image, split into ${state.carouselSlides} parts visually, high quality, ${p}`;
+                } else if (state.mode === 'fashion') {
+                    p = `High fashion photography, trendy outfit, editorial look, ${p}, highly detailed fabric texture`;
+                } else if (state.mode==='pasfoto') p=`Professional ID Photo, ${p}, solid background, front facing, formal attire, high quality`;
+                else if (state.mode==='interior') p=`Interior Design Photography, ${p}, photorealistic, 8k`;
+                else if (state.mode==='exterior') p=`Architectural Exterior Photography, ${p}, photorealistic, 8k`;
+                else if (state.mode==='sketch') p=`Artistic Sketch Drawing, ${p}, pencil style`;
+                else if (state.mode==='art') p=`Digital Art Illustration, ${p}, artistic style`;
+                else if (state.mode==='maternity') p=`Maternity photography, ${p}, soft lighting`;
+                else if (state.mode==='umroh') p=`Realistic religious photo, ${p}, respectful`;
+                else if (state.mode==='prewedding') p=`Romantic prewedding, ${p}, bokeh`;
+                else if (state.mode==='wedding') p=`Wedding day, ${p}, cinematic`;
+
+                const requestPromises = Array(4).fill(0).map(() => 
+                    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`, {
+                        method:'POST', headers:{'Content-Type':'application/json'},
+                        body:JSON.stringify({
+                            contents:[{parts:[{text:p},{inlineData:{mimeType:"image/jpeg", data:clean}}]}],
+                            generationConfig:{responseModalities:["IMAGE"], temperature: 0.75}
+                        })
+                    }).then(res => res.json())
+                );
+
+                const responses = await Promise.allSettled(requestPromises);
+
+                responses.forEach((res, index) => {
+                    document.getElementById(`slot-${index}`).classList.remove('thumb-loader');
+                    if (res.status === 'fulfilled' && !res.value.error && res.value.candidates?.[0]?.content?.parts?.[0]?.inlineData) {
+                        const imgData = res.value.candidates[0].content.parts[0].inlineData.data;
+                        state.results[index] = `data:image/jpeg;base64,${imgData}`;
+                        const th = document.getElementById(`thumb-${index}`); th.src = state.results[index]; th.classList.remove('hidden');
+                        if(state.results.length === 1 || !document.getElementById('output-image').src) selectResult(index);
+                    } else {
+                        document.getElementById(`slot-${index}`).innerHTML = '<span class="text-[8px] text-red-400">Gagal</span>';
+                    }
+                });
+                log('Selesai!');
+            } catch(e) {
+                alert("Error: "+e.message);
+                document.getElementById('output-placeholder').classList.remove('hidden');
+            } finally {
+                ldr.classList.add('hidden'); btn.disabled=false;
+            }
+        };
+
+        window.selectResult = (index) => {
+            if(!state.results[index]) return;
+            state.selectedIndex = index;
+            for(let i=0; i<4; i++) document.getElementById(`slot-${i}`).classList.remove('selected');
+            document.getElementById(`slot-${index}`).classList.add('selected');
+            const main = document.getElementById('output-image');
+            main.classList.add('opacity-0');
+            setTimeout(() => { main.src = state.results[index]; main.classList.remove('hidden'); main.classList.remove('opacity-0'); }, 150);
+            document.getElementById('output-placeholder').classList.add('hidden');
+            document.getElementById('btn-download').disabled=false;
+            if(state.mode === 'carousel') document.getElementById('btn-dl-carousel').classList.remove('hidden');
+            else document.getElementById('btn-dl-carousel').classList.add('hidden');
+        };
+
+        window.suggestPrompt = () => {
+            const l = presets[state.mode] || presets['edit'];
+            document.getElementById('prompt-box').value = l[Math.floor(Math.random()*l.length)];
+        };
+
+        window.downloadImage = () => {
+            if(!state.results[state.selectedIndex]) return;
+            const a = document.createElement('a'); a.href = state.results[state.selectedIndex];
+            a.download = `sulap-${state.mode}-${state.ratio}-${Date.now()}.jpg`; a.click();
+        };
+
+        window.downloadCarousel = () => {
+            if(!state.results[state.selectedIndex]) return;
+            const img = new Image(); img.src = state.results[state.selectedIndex];
+            img.onload = () => {
+                const cvs = document.getElementById('slice-canvas'); const ctx = cvs.getContext('2d');
+                const slideW = img.width / state.carouselSlides; const slideH = img.height;
+                cvs.width = slideW; cvs.height = slideH;
+                for(let i=0; i<state.carouselSlides; i++) {
+                    ctx.clearRect(0,0,slideW, slideH); ctx.drawImage(img, i*slideW, 0, slideW, slideH, 0, 0, slideW, slideH);
+                    const a = document.createElement('a'); a.href = cvs.toDataURL('image/jpeg'); a.download = `slide-${i+1}.jpg`; a.click();
+                }
+                alert(`Mendownload ${state.carouselSlides} slide.`);
+            };
+        };
+
+        function log(m){ const d=document.createElement('div'); d.innerText='> '+m; document.getElementById('debug-log').prepend(d); }
+
+        init();
+    </script>
+</body>
+</html>
+
+
